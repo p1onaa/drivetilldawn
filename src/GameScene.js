@@ -21,6 +21,9 @@ export class GameScene {
     
     // Game state
     this.gameOver = false;
+    
+    // Car lights
+    this.carLights = [];
   }
   
   async init() {
@@ -40,11 +43,11 @@ export class GameScene {
   
   setupLighting() {
     // Ambient light for night scene
-    const ambientLight = new THREE.AmbientLight(0x404080, 0.4);
+    const ambientLight = new THREE.AmbientLight(0x404080, 0.3);
     this.scene.add(ambientLight);
     
     // Directional light (moonlight)
-    const directionalLight = new THREE.DirectionalLight(0x8080ff, 0.6);
+    const directionalLight = new THREE.DirectionalLight(0x8080ff, 0.4);
     directionalLight.position.set(-10, 20, 10);
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.width = 2048;
@@ -56,21 +59,6 @@ export class GameScene {
     directionalLight.shadow.camera.top = 20;
     directionalLight.shadow.camera.bottom = -20;
     this.scene.add(directionalLight);
-    
-    // Car headlights
-    const headlight1 = new THREE.SpotLight(0xffffff, 1.5, 40, Math.PI / 6, 0.5);
-    headlight1.position.set(-0.5, 1, 2);
-    headlight1.target.position.set(-0.5, 0, -15);
-    this.scene.add(headlight1);
-    this.scene.add(headlight1.target);
-    
-    const headlight2 = new THREE.SpotLight(0xffffff, 1.5, 40, Math.PI / 6, 0.5);
-    headlight2.position.set(0.5, 1, 2);
-    headlight2.target.position.set(0.5, 0, -15);
-    this.scene.add(headlight2);
-    this.scene.add(headlight2.target);
-    
-    this.headlights = [headlight1, headlight2];
   }
   
   async loadCar() {
@@ -78,8 +66,9 @@ export class GameScene {
       const gltf = await this.loader.loadAsync('./models/boltcar.glb');
       const loadedCar = gltf.scene;
       
-      // Remove the fallback car
+      // Remove the fallback car and its lights
       if (this.car) {
+        this.removeCarLights(this.car);
         this.scene.remove(this.car);
       }
       
@@ -98,6 +87,7 @@ export class GameScene {
       });
       
       this.scene.add(this.car);
+      this.addCarLights(this.car, false); // Player car (not oncoming)
       console.log('Car model loaded successfully');
     } catch (error) {
       console.error('Error loading car model:', error);
@@ -113,7 +103,91 @@ export class GameScene {
     this.car.castShadow = true;
     this.car.receiveShadow = true;
     this.scene.add(this.car);
+    this.addCarLights(this.car, false); // Player car (not oncoming)
     console.log('Fallback car created');
+  }
+  
+  addCarLights(car, isOncoming = false) {
+    const lights = [];
+    
+    if (isOncoming) {
+      // Oncoming cars - white headlights at front
+      const headlight1 = new THREE.SpotLight(0xffffff, 2, 30, Math.PI / 8, 0.5);
+      headlight1.position.set(-0.5, 1, 2);
+      headlight1.target.position.set(-0.5, 0, 15);
+      
+      const headlight2 = new THREE.SpotLight(0xffffff, 2, 30, Math.PI / 8, 0.5);
+      headlight2.position.set(0.5, 1, 2);
+      headlight2.target.position.set(0.5, 0, 15);
+      
+      car.add(headlight1);
+      car.add(headlight1.target);
+      car.add(headlight2);
+      car.add(headlight2.target);
+      
+      lights.push(headlight1, headlight2);
+      
+      // Add glowing headlight geometry for bloom effect
+      const headlightGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+      const headlightMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.8
+      });
+      
+      const headlightGlow1 = new THREE.Mesh(headlightGeometry, headlightMaterial);
+      headlightGlow1.position.set(-0.5, 1, 2);
+      car.add(headlightGlow1);
+      
+      const headlightGlow2 = new THREE.Mesh(headlightGeometry, headlightMaterial);
+      headlightGlow2.position.set(0.5, 1, 2);
+      car.add(headlightGlow2);
+      
+    } else {
+      // Same direction cars and player car - red taillights at back
+      const taillight1 = new THREE.PointLight(0xff0000, 1, 15, 2);
+      taillight1.position.set(-0.5, 1, -2);
+      
+      const taillight2 = new THREE.PointLight(0xff0000, 1, 15, 2);
+      taillight2.position.set(0.5, 1, -2);
+      
+      car.add(taillight1);
+      car.add(taillight2);
+      
+      lights.push(taillight1, taillight2);
+      
+      // Add glowing taillight geometry for bloom effect
+      const taillightGeometry = new THREE.SphereGeometry(0.08, 8, 8);
+      const taillightMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000,
+        transparent: true,
+        opacity: 0.9
+      });
+      
+      const taillightGlow1 = new THREE.Mesh(taillightGeometry, taillightMaterial);
+      taillightGlow1.position.set(-0.5, 1, -2);
+      car.add(taillightGlow1);
+      
+      const taillightGlow2 = new THREE.Mesh(taillightGeometry, taillightMaterial);
+      taillightGlow2.position.set(0.5, 1, -2);
+      car.add(taillightGlow2);
+    }
+    
+    // Store lights reference for cleanup
+    car.userData.lights = lights;
+    this.carLights.push(...lights);
+  }
+  
+  removeCarLights(car) {
+    if (car.userData.lights) {
+      car.userData.lights.forEach(light => {
+        const index = this.carLights.indexOf(light);
+        if (index > -1) {
+          this.carLights.splice(index, 1);
+        }
+      });
+      car.userData.lights = [];
+    }
   }
   
   update(input) {
@@ -121,16 +195,21 @@ export class GameScene {
     
     this.handleInput(input);
     this.updateCarPosition();
-    this.updateHeadlights();
     this.roadSystem.update();
     this.skySystem.update();
     this.obstacleSystem.update();
+    
+    // Add lights to new obstacle cars
+    this.obstacleSystem.getObstacles().forEach(obstacle => {
+      if (!obstacle.mesh.userData.lights) {
+        this.addCarLights(obstacle.mesh, obstacle.isOncoming);
+      }
+    });
     
     // Check for collisions
     if (this.obstacleSystem.checkCollision(this.car)) {
       this.gameOver = true;
       console.log('GAME OVER! You crashed into another car!');
-      // You could add visual effects, restart logic, etc. here
     }
   }
   
@@ -157,24 +236,6 @@ export class GameScene {
       } else {
         this.car.position.x = this.targetLaneX;
       }
-    }
-  }
-  
-  updateHeadlights() {
-    if (this.car && this.headlights) {
-      this.headlights.forEach((light, index) => {
-        const offset = index === 0 ? -0.5 : 0.5;
-        light.position.set(
-          this.car.position.x + offset,
-          this.car.position.y + 1,
-          this.car.position.z + 2
-        );
-        light.target.position.set(
-          this.car.position.x + offset,
-          0,
-          this.car.position.z + 15
-        );
-      });
     }
   }
   

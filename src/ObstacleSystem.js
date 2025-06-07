@@ -13,12 +13,12 @@ export class ObstacleSystem {
     this.spawnDistance = -100;
     this.despawnDistance = 50;
     this.spawnTimer = 0;
-    this.spawnInterval = 2000; // milliseconds
+    this.spawnInterval = 1500; // milliseconds - reduced for more traffic
     this.lastSpawnTime = 0;
     
     // Speed settings
-    this.forwardLaneSpeed = 0.1; // Same direction as player (slower)
-    this.oncomingLaneSpeed = 0.8; // Opposite direction (faster)
+    this.forwardLaneSpeed = 0.15; // Same direction as player (slower)
+    this.oncomingLaneSpeed = 0.9; // Opposite direction (faster)
     
     this.isLoaded = false;
   }
@@ -78,8 +78,17 @@ export class ObstacleSystem {
     const currentTime = Date.now();
     if (currentTime - this.lastSpawnTime < this.spawnInterval) return;
     
-    // Random lane selection
-    const laneIndex = Math.floor(Math.random() * this.lanes.length);
+    // Random lane selection with higher probability for right lanes
+    let laneIndex;
+    const rand = Math.random();
+    if (rand < 0.3) {
+      // 30% chance for left lanes (oncoming)
+      laneIndex = Math.floor(Math.random() * 2); // 0 or 1
+    } else {
+      // 70% chance for right lanes (same direction)
+      laneIndex = 2 + Math.floor(Math.random() * 2); // 2 or 3
+    }
+    
     const laneX = this.lanes[laneIndex];
     
     // Random car model

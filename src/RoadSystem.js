@@ -25,10 +25,11 @@ export class RoadSystem {
   createRoadSegment() {
     const group = new THREE.Group();
     
-    // Road surface - wider and cleaner
+    // Road surface - wider and cleaner with emissive properties for bloom
     const roadGeometry = new THREE.PlaneGeometry(12, this.segmentLength);
     const roadMaterial = new THREE.MeshLambertMaterial({ 
       color: 0x2a2a2a,
+      emissive: 0x111111, // Slight emissive for bloom effect
       side: THREE.DoubleSide
     });
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
@@ -36,7 +37,7 @@ export class RoadSystem {
     road.receiveShadow = true;
     group.add(road);
     
-    // Lane lines
+    // Lane lines with emissive properties
     this.addLaneLines(group);
     
     return group;
@@ -45,24 +46,24 @@ export class RoadSystem {
   addLaneLines(group) {
     const lineGeometry = new THREE.PlaneGeometry(0.2, this.segmentLength);
     
-    // Center divider (double yellow line)
-    const centerLine1 = new THREE.Mesh(lineGeometry, new THREE.MeshBasicMaterial({ 
+    // Center divider (double yellow line) with glow
+    const centerLineMaterial = new THREE.MeshBasicMaterial({ 
       color: 0xffff00,
+      emissive: 0x444400, // Emissive for bloom
       side: THREE.DoubleSide
-    }));
+    });
+    
+    const centerLine1 = new THREE.Mesh(lineGeometry, centerLineMaterial);
     centerLine1.rotation.x = -Math.PI / 2;
     centerLine1.position.set(-0.3, 0.01, 0);
     group.add(centerLine1);
     
-    const centerLine2 = new THREE.Mesh(lineGeometry, new THREE.MeshBasicMaterial({ 
-      color: 0xffff00,
-      side: THREE.DoubleSide
-    }));
+    const centerLine2 = new THREE.Mesh(lineGeometry, centerLineMaterial);
     centerLine2.rotation.x = -Math.PI / 2;
     centerLine2.position.set(0.3, 0.01, 0);
     group.add(centerLine2);
     
-    // Lane dividers (dashed white lines)
+    // Lane dividers (dashed white lines) with glow
     this.addDashedLine(group, -3, 0xffffff);
     this.addDashedLine(group, 3, 0xffffff);
   }
@@ -76,6 +77,7 @@ export class RoadSystem {
       const dashGeometry = new THREE.PlaneGeometry(0.15, dashLength);
       const dashMaterial = new THREE.MeshBasicMaterial({ 
         color: color,
+        emissive: color === 0xffffff ? 0x222222 : 0x000000, // Emissive for bloom
         side: THREE.DoubleSide
       });
       const dash = new THREE.Mesh(dashGeometry, dashMaterial);
