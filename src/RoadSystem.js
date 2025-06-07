@@ -25,11 +25,11 @@ export class RoadSystem {
   createRoadSegment() {
     const group = new THREE.Group();
     
-    // Road surface - wider and cleaner with emissive properties for bloom
+    // Road surface - reduced emissive for less bloom
     const roadGeometry = new THREE.PlaneGeometry(12, this.segmentLength);
     const roadMaterial = new THREE.MeshLambertMaterial({ 
       color: 0x2a2a2a,
-      emissive: 0x111111, // Slight emissive for bloom effect
+      emissive: 0x050505, // Reduced emissive from 0x111111
       side: THREE.DoubleSide
     });
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
@@ -37,7 +37,7 @@ export class RoadSystem {
     road.receiveShadow = true;
     group.add(road);
     
-    // Lane lines with emissive properties
+    // Lane lines with reduced emissive properties
     this.addLaneLines(group);
     
     return group;
@@ -46,10 +46,10 @@ export class RoadSystem {
   addLaneLines(group) {
     const lineGeometry = new THREE.PlaneGeometry(0.2, this.segmentLength);
     
-    // Center divider (double yellow line) with glow
+    // Center divider (double yellow line) with reduced glow
     const centerLineMaterial = new THREE.MeshBasicMaterial({ 
       color: 0xffff00,
-      emissive: 0x444400, // Emissive for bloom
+      emissive: 0x222200, // Reduced emissive from 0x444400
       side: THREE.DoubleSide
     });
     
@@ -63,7 +63,7 @@ export class RoadSystem {
     centerLine2.position.set(0.3, 0.01, 0);
     group.add(centerLine2);
     
-    // Lane dividers (dashed white lines) with glow
+    // Lane dividers (dashed white lines) with reduced glow
     this.addDashedLine(group, -3, 0xffffff);
     this.addDashedLine(group, 3, 0xffffff);
   }
@@ -77,7 +77,7 @@ export class RoadSystem {
       const dashGeometry = new THREE.PlaneGeometry(0.15, dashLength);
       const dashMaterial = new THREE.MeshBasicMaterial({ 
         color: color,
-        emissive: color === 0xffffff ? 0x222222 : 0x000000, // Emissive for bloom
+        emissive: color === 0xffffff ? 0x111111 : 0x000000, // Reduced emissive from 0x222222
         side: THREE.DoubleSide
       });
       const dash = new THREE.Mesh(dashGeometry, dashMaterial);
