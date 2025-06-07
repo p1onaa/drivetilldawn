@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoadSystem } from './RoadSystem.js';
 import { SkySystem } from './SkySystem.js';
+import { ObstacleSystem } from './ObstacleSystem.js';
 
 export class GameScene {
   constructor(scene) {
@@ -9,6 +10,7 @@ export class GameScene {
     this.car = null;
     this.roadSystem = null;
     this.skySystem = null;
+    this.obstacleSystem = null;
     this.loader = new GLTFLoader();
     
     // Lane positions (4 lanes total)
@@ -16,12 +18,16 @@ export class GameScene {
     this.currentLane = 2; // Start in right forward lane
     this.targetLaneX = this.lanes[this.currentLane];
     this.laneChangeSpeed = 0.1;
+    
+    // Game state
+    this.gameOver = false;
   }
   
   async init() {
     this.setupLighting();
     this.skySystem = new SkySystem(this.scene);
     this.roadSystem = new RoadSystem(this.scene);
+    this.obstacleSystem = new ObstacleSystem(this.scene);
     
     // Create fallback car first, then try to load the model
     this.createFallbackCar();
@@ -29,6 +35,7 @@ export class GameScene {
     
     this.skySystem.init();
     this.roadSystem.init();
+    await this.obstacleSystem.init();
   }
   
   setupLighting() {
@@ -110,11 +117,21 @@ export class GameScene {
   }
   
   update(input) {
+    if (this.gameOver) return;
+    
     this.handleInput(input);
     this.updateCarPosition();
     this.updateHeadlights();
     this.roadSystem.update();
     this.skySystem.update();
+    this.obstacleSystem.update();
+    
+    // Check for collisions
+    if (this.obstacleSystem.checkCollision(this.car)) {
+      this.gameOver = true;
+      console.log('GAME OVER! You crashed into another car!');
+      // You could add visual effects, restart logic, etc. here
+    }
   }
   
   handleInput(input) {
@@ -159,5 +176,19 @@ export class GameScene {
         );
       });
     }
+  }
+  
+  isGameOver() {
+    return this.gameOver;
+  }
+  
+  restart() {
+    this.gameOver = false;
+    this.currentLane = 2;
+    this.targetLaneX = this.lanes[this.currentLane];
+    if (this.car) {
+      this.car.position.set(this.targetLaneX, this.car.position.y, 0);
+    }
+    console.log('Game restarted');
   }
 }

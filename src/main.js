@@ -87,6 +87,12 @@ class NightDrivingGame {
       this.camera.position.y = 4;
       this.camera.lookAt(carPosition.x, carPosition.y, carPosition.z - 3);
     }
+    
+    // Handle game over state
+    if (this.gameScene.isGameOver()) {
+      // You could add game over UI, pause the game, etc.
+      // For now, we'll just log and continue
+    }
   }
   
   render() {
