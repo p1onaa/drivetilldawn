@@ -112,11 +112,11 @@ export class GameScene {
     
     if (isOncoming) {
       // Oncoming cars - white headlights at front
-      const headlight1 = new THREE.SpotLight(0xffffff, 1.5, 25, Math.PI / 8, 0.5); // Reduced intensity
+      const headlight1 = new THREE.SpotLight(0xffffff, 2, 30, Math.PI / 8, 0.5);
       headlight1.position.set(-0.5, 1, 2);
       headlight1.target.position.set(-0.5, 0, 15);
       
-      const headlight2 = new THREE.SpotLight(0xffffff, 1.5, 25, Math.PI / 8, 0.5); // Reduced intensity
+      const headlight2 = new THREE.SpotLight(0xffffff, 2, 30, Math.PI / 8, 0.5);
       headlight2.position.set(0.5, 1, 2);
       headlight2.target.position.set(0.5, 0, 15);
       
@@ -127,12 +127,12 @@ export class GameScene {
       
       lights.push(headlight1, headlight2);
       
-      // Add glowing headlight geometry for bloom effect - reduced emissive
+      // Add glowing headlight geometry for bloom effect
       const headlightGeometry = new THREE.SphereGeometry(0.1, 8, 8);
       const headlightMaterial = new THREE.MeshBasicMaterial({ 
         color: 0xffffff,
         transparent: true,
-        opacity: 0.6 // Reduced from 0.8
+        opacity: 0.8
       });
       
       const headlightGlow1 = new THREE.Mesh(headlightGeometry, headlightMaterial);
@@ -145,10 +145,10 @@ export class GameScene {
       
     } else {
       // Same direction cars and player car - red taillights at back
-      const taillight1 = new THREE.PointLight(0xff0000, 0.8, 12, 2); // Reduced intensity and distance
+      const taillight1 = new THREE.PointLight(0xff0000, 1, 15, 2);
       taillight1.position.set(-0.5, 1, -2);
       
-      const taillight2 = new THREE.PointLight(0xff0000, 0.8, 12, 2); // Reduced intensity and distance
+      const taillight2 = new THREE.PointLight(0xff0000, 1, 15, 2);
       taillight2.position.set(0.5, 1, -2);
       
       car.add(taillight1);
@@ -156,12 +156,12 @@ export class GameScene {
       
       lights.push(taillight1, taillight2);
       
-      // Add glowing taillight geometry for bloom effect - reduced emissive
+      // Add glowing taillight geometry for bloom effect
       const taillightGeometry = new THREE.SphereGeometry(0.08, 8, 8);
       const taillightMaterial = new THREE.MeshBasicMaterial({ 
         color: 0xff0000,
         transparent: true,
-        opacity: 0.7 // Reduced from 0.9
+        opacity: 0.9
       });
       
       const taillightGlow1 = new THREE.Mesh(taillightGeometry, taillightMaterial);

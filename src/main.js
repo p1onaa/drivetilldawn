@@ -44,7 +44,7 @@ class NightDrivingGame {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ReinhardToneMapping;
-    this.renderer.toneMappingExposure = 1.2; // Reduced from 1.5
+    this.renderer.toneMappingExposure = 1.5;
     document.getElementById('gameContainer').appendChild(this.renderer.domElement);
   }
   
@@ -72,9 +72,9 @@ class NightDrivingGame {
     
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.8, // Reduced strength from 1.5 to 0.8
-      0.3, // Reduced radius from 0.4 to 0.3
-      0.9  // Increased threshold from 0.85 to 0.9 (less bloom)
+      1.5, // strength
+      0.4, // radius
+      0.85 // threshold
     );
     this.composer.addPass(bloomPass);
     
