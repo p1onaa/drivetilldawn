@@ -1,8 +1,5 @@
 import * as THREE from 'three';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GameScene } from './GameScene.js';
 import { InputHandler } from './InputHandler.js';
 
@@ -11,7 +8,6 @@ class NightDrivingGame {
     this.scene = null;
     this.camera = null;
     this.renderer = null;
-    this.composer = null;
     this.gameScene = null;
     this.inputHandler = null;
     this.isLoaded = false;
@@ -23,7 +19,6 @@ class NightDrivingGame {
     this.setupRenderer();
     this.setupCamera();
     this.setupScene();
-    this.setupPostProcessing();
     
     this.gameScene = new GameScene(this.scene);
     this.inputHandler = new InputHandler();
@@ -40,11 +35,9 @@ class NightDrivingGame {
   setupRenderer() {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setClearColor(0x000000, 1);
+    this.renderer.setClearColor(0x000000, 1); // Pure black background
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.toneMapping = THREE.ReinhardToneMapping;
-    this.renderer.toneMappingExposure = 1.5;
     document.getElementById('gameContainer').appendChild(this.renderer.domElement);
   }
   
@@ -55,31 +48,14 @@ class NightDrivingGame {
       0.1,
       1000
     );
+    // Closer camera position - lower and closer to the car
     this.camera.position.set(0, 4, 8);
     this.camera.lookAt(0, 0, 0);
   }
   
   setupScene() {
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.Fog(0x000000, 30, 150);
-  }
-  
-  setupPostProcessing() {
-    this.composer = new EffectComposer(this.renderer);
-    
-    const renderPass = new RenderPass(this.scene, this.camera);
-    this.composer.addPass(renderPass);
-    
-    const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight),
-      1.5, // strength
-      0.4, // radius
-      0.85 // threshold
-    );
-    this.composer.addPass(bloomPass);
-    
-    const outputPass = new OutputPass();
-    this.composer.addPass(outputPass);
+    this.scene.fog = new THREE.Fog(0x000000, 30, 150); // Black fog to match the sky
   }
   
   hideLoading() {
@@ -103,7 +79,7 @@ class NightDrivingGame {
     const input = this.inputHandler.getInput();
     this.gameScene.update(input);
     
-    // Update camera to follow car
+    // Update camera to follow car - closer and more dynamic
     if (this.gameScene.car) {
       const carPosition = this.gameScene.car.position;
       this.camera.position.x = carPosition.x;
@@ -120,21 +96,16 @@ class NightDrivingGame {
   }
   
   render() {
-    this.composer.render();
-  }
-  
-  onWindowResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.composer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.render(this.scene, this.camera);
   }
 }
 
 // Handle window resize
 window.addEventListener('resize', () => {
-  if (window.game) {
-    window.game.onWindowResize();
+  if (window.game && window.game.camera && window.game.renderer) {
+    window.game.camera.aspect = window.innerWidth / window.innerHeight;
+    window.game.camera.updateProjectionMatrix();
+    window.game.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 });
 
