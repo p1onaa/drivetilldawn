@@ -21,7 +21,7 @@ export class GameScene {
     // Enhanced lane changing system
     this.isChangingLanes = false;
     this.laneChangeProgress = 0;
-    this.laneChangeDuration = 0.24; // 0.4 seconds for lane change
+    this.laneChangeDuration = 0.4; // 0.4 seconds for lane change
     this.laneChangeStartX = 0;
     this.laneChangeTargetX = 0;
     
