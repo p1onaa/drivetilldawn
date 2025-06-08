@@ -33,8 +33,9 @@ export class GameScene {
     this.maxSteerAngle = -0.4; // Maximum steering angle in radians
     this.maxTiltAngle = 0.1; // Maximum banking angle in radians
     
-    // Collision detection
+    // Collision detection with tilted hitbox support
     this.playerBoundingBox = new THREE.Box3();
+    this.tiltedBoundingBox = new THREE.Box3(); // For tilted collision detection
     this.gameOver = false;
     
     // Progressive speed system
@@ -230,8 +231,33 @@ export class GameScene {
       }
     }
     
-    // Update player bounding box
+    // Update player bounding boxes (both regular and tilted)
+    this.updatePlayerBoundingBoxes();
+  }
+  
+  updatePlayerBoundingBoxes() {
+    if (!this.car) return;
+    
+    // Regular bounding box
     this.playerBoundingBox.setFromObject(this.car);
+    
+    // Create tilted bounding box when car is rotating/tilting
+    if (Math.abs(this.carRotationY) > 0.01 || Math.abs(this.carTiltZ) > 0.01) {
+      // Create a temporary object with the car's current rotation for accurate bounds
+      const tempCar = this.car.clone();
+      tempCar.rotation.copy(this.car.rotation);
+      tempCar.position.copy(this.car.position);
+      
+      // Calculate tilted bounding box
+      this.tiltedBoundingBox.setFromObject(tempCar);
+      
+      // Expand the tilted bounding box slightly to account for rotation inaccuracies
+      const expansion = new THREE.Vector3(0.2, 0.1, 0.2);
+      this.tiltedBoundingBox.expandByVector(expansion);
+    } else {
+      // When not tilting, use regular bounding box
+      this.tiltedBoundingBox.copy(this.playerBoundingBox);
+    }
   }
   
   updateCarRotation() {
@@ -267,7 +293,11 @@ export class GameScene {
   
   updateCollision() {
     if (this.car && this.trafficSystem) {
-      if (this.trafficSystem.checkCollision(this.playerBoundingBox)) {
+      // Use tilted bounding box for more accurate collision detection during lane changes
+      const collisionBox = this.isChangingLanes || Math.abs(this.carRotationY) > 0.01 ? 
+                          this.tiltedBoundingBox : this.playerBoundingBox;
+      
+      if (this.trafficSystem.checkCollision(collisionBox)) {
         this.gameOver = true;
         console.log('🚗💥 GAME OVER! You collided with oncoming traffic!');
         
