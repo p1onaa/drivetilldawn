@@ -43,6 +43,9 @@ export class GameScene {
     this.maxSpeedMultiplier = 3.0; // Maximum speed multiplier (3x faster)
     this.speedIncreaseRate = 0.0008; // How fast the speed increases (very gradual)
     this.gameTime = 0; // Track game time for speed progression
+    
+    // Explosion system
+    this.explosions = [];
   }
   
   async init() {
@@ -144,6 +147,121 @@ export class GameScene {
     console.log('Fallback car created');
   }
   
+  createExplosion(position) {
+    const explosionGroup = new THREE.Group();
+    
+    // Create multiple particle systems for the explosion
+    const particleCount = 50;
+    const particles = [];
+    
+    for (let i = 0; i < particleCount; i++) {
+      // Create particle geometry
+      const particleGeometry = new THREE.SphereGeometry(0.1, 4, 4);
+      const particleMaterial = new THREE.MeshBasicMaterial({
+        color: new THREE.Color().setHSL(Math.random() * 0.1, 1, 0.5 + Math.random() * 0.5), // Orange/red colors
+        transparent: true,
+        opacity: 1
+      });
+      
+      const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+      
+      // Random position around explosion center
+      particle.position.copy(position);
+      particle.position.add(new THREE.Vector3(
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2
+      ));
+      
+      // Random velocity
+      const velocity = new THREE.Vector3(
+        (Math.random() - 0.5) * 0.5,
+        Math.random() * 0.3 + 0.1,
+        (Math.random() - 0.5) * 0.5
+      );
+      
+      particles.push({
+        mesh: particle,
+        velocity: velocity,
+        life: 1.0,
+        decay: 0.02 + Math.random() * 0.02
+      });
+      
+      explosionGroup.add(particle);
+    }
+    
+    // Add bright flash effect
+    const flashGeometry = new THREE.SphereGeometry(3, 8, 8);
+    const flashMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffaa00,
+      transparent: true,
+      opacity: 0.8
+    });
+    const flash = new THREE.Mesh(flashGeometry, flashMaterial);
+    flash.position.copy(position);
+    explosionGroup.add(flash);
+    
+    const explosion = {
+      group: explosionGroup,
+      particles: particles,
+      flash: flash,
+      life: 1.0,
+      flashLife: 1.0
+    };
+    
+    this.explosions.push(explosion);
+    this.scene.add(explosionGroup);
+    
+    return explosion;
+  }
+  
+  updateExplosions() {
+    this.explosions = this.explosions.filter(explosion => {
+      // Update flash
+      explosion.flashLife -= 0.1;
+      if (explosion.flashLife > 0) {
+        explosion.flash.material.opacity = explosion.flashLife * 0.8;
+        explosion.flash.scale.setScalar(1 + (1 - explosion.flashLife) * 2);
+      } else {
+        explosion.group.remove(explosion.flash);
+      }
+      
+      // Update particles
+      explosion.particles.forEach(particle => {
+        // Apply velocity
+        particle.mesh.position.add(particle.velocity);
+        
+        // Apply gravity
+        particle.velocity.y -= 0.01;
+        
+        // Fade out
+        particle.life -= particle.decay;
+        particle.mesh.material.opacity = Math.max(0, particle.life);
+        
+        // Scale down
+        const scale = particle.life;
+        particle.mesh.scale.setScalar(scale);
+      });
+      
+      // Remove dead particles
+      explosion.particles = explosion.particles.filter(particle => {
+        if (particle.life <= 0) {
+          explosion.group.remove(particle.mesh);
+          return false;
+        }
+        return true;
+      });
+      
+      // Remove explosion when all particles are dead
+      if (explosion.particles.length === 0 && explosion.flashLife <= 0) {
+        this.scene.remove(explosion.group);
+        return false;
+      }
+      
+      return true;
+    });
+  }
+  
   update(input) {
     if (this.gameOver) return;
     
@@ -155,6 +273,7 @@ export class GameScene {
     this.updateCarMovement();
     this.updateCarRotation();
     this.updateCollision();
+    this.updateExplosions();
     
     // Pass speed multiplier to systems
     this.roadSystem.update(this.currentSpeedMultiplier);
@@ -267,24 +386,17 @@ export class GameScene {
   
   updateCollision() {
     if (this.car && this.trafficSystem) {
-      if (this.trafficSystem.checkCollision(this.playerBoundingBox)) {
+      const collisionResult = this.trafficSystem.checkCollision(this.playerBoundingBox);
+      if (collisionResult.collision) {
         this.gameOver = true;
         console.log('🚗💥 GAME OVER! You collided with oncoming traffic!');
         
-        // Visual feedback - make car glow red
-        this.car.traverse((child) => {
-          if (child.isMesh && child.material) {
-            if (Array.isArray(child.material)) {
-              child.material.forEach(mat => {
-                mat.emissive = new THREE.Color(0xff0000);
-                mat.emissiveIntensity = 0.8;
-              });
-            } else {
-              child.material.emissive = new THREE.Color(0xff0000);
-              child.material.emissiveIntensity = 0.8;
-            }
-          }
-        });
+        // Create explosion at collision point
+        const explosionPosition = collisionResult.collisionPoint || this.car.position.clone();
+        this.createExplosion(explosionPosition);
+        
+        // Hide the player car instead of making it red
+        this.car.visible = false;
       }
     }
   }
@@ -320,10 +432,17 @@ export class GameScene {
     this.targetRotationY = 0;
     this.targetTiltZ = 0;
     
+    // Clear all explosions
+    this.explosions.forEach(explosion => {
+      this.scene.remove(explosion.group);
+    });
+    this.explosions = [];
+    
     if (this.car) {
       this.car.position.set(this.targetLaneX, this.car.position.y, 0);
       this.car.rotation.y = 0;
       this.car.rotation.z = 0;
+      this.car.visible = true; // Make car visible again
       
       // Reset car material to original bloom effect
       this.car.traverse((child) => {

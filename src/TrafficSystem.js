@@ -169,10 +169,18 @@ export class TrafficSystem {
   checkCollision(playerBoundingBox) {
     for (let car of this.cars) {
       if (playerBoundingBox.intersectsBox(car.boundingBox)) {
-        return true;
+        // Return collision info including the collision point
+        const collisionPoint = new THREE.Vector3();
+        playerBoundingBox.getCenter(collisionPoint);
+        
+        return {
+          collision: true,
+          collisionPoint: collisionPoint,
+          car: car
+        };
       }
     }
-    return false;
+    return { collision: false };
   }
   
   getCars() {
