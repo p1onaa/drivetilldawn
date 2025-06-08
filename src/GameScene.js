@@ -388,15 +388,15 @@ export class GameScene {
     if (this.car && this.trafficSystem) {
       const collisionResult = this.trafficSystem.checkCollision(this.playerBoundingBox);
       if (collisionResult.collision) {
-        this.gameOver = true;
-        console.log('🚗💥 GAME OVER! You collided with oncoming traffic!');
-        
         // Create explosion at collision point
         const explosionPosition = collisionResult.collisionPoint || this.car.position.clone();
         this.createExplosion(explosionPosition);
         
         // Hide the player car instead of making it red
         this.car.visible = false;
+        
+        this.gameOver = true;
+        console.log('🚗💥 GAME OVER! You collided with oncoming traffic!');
       }
     }
   }
