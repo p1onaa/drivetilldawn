@@ -19,7 +19,6 @@ class NightDrivingGame {
     // Score system
     this.score = 0;
     this.scoreElement = null;
-    this.speedElement = null;
     
     this.init();
   }
@@ -36,7 +35,6 @@ class NightDrivingGame {
     
     this.hideLoading();
     this.showScore();
-    this.showSpeedIndicator();
     this.isLoaded = true;
     
     this.animate();
@@ -78,22 +76,9 @@ class NightDrivingGame {
     this.updateScore();
   }
   
-  showSpeedIndicator() {
-    this.speedElement = document.getElementById('speedIndicator');
-    this.speedElement.style.display = 'block';
-    this.updateSpeedIndicator();
-  }
-  
   updateScore() {
     if (this.scoreElement) {
-      this.scoreElement.textContent = Math.floor(this.score);
-    }
-  }
-  
-  updateSpeedIndicator() {
-    if (this.speedElement && this.gameScene) {
-      const speedMultiplier = this.gameScene.getSpeedMultiplier();
-      this.speedElement.textContent = `Speed: ${speedMultiplier.toFixed(1)}x`;
+      this.scoreElement.textContent = `Score: ${Math.floor(this.score)} meters`;
     }
   }
   
@@ -116,7 +101,6 @@ class NightDrivingGame {
       // Base score increase of 0.1 meters per frame, multiplied by current speed
       this.score += 0.1 * speedMultiplier;
       this.updateScore();
-      this.updateSpeedIndicator();
     }
     
     // Check for game over and handle restart
@@ -126,7 +110,6 @@ class NightDrivingGame {
         this.gameScene.reset();
         this.score = 0; // Reset score on restart
         this.updateScore();
-        this.updateSpeedIndicator();
         console.log('🔄 Game restarted! Drive safely!');
       }
     }
