@@ -78,7 +78,7 @@ class NightDrivingGame {
   
   updateScore() {
     if (this.scoreElement) {
-      this.scoreElement.textContent = `Score: ${Math.floor(this.score)} meters`;
+      this.scoreElement.textContent = `${Math.floor(this.score)}`;
     }
   }
   
