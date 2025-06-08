@@ -30,7 +30,7 @@ export class GameScene {
     this.carTiltZ = 0; // Banking/leaning into turns
     this.targetRotationY = 0;
     this.targetTiltZ = 0;
-    this.maxSteerAngle = -0.5; // Maximum steering angle in radians
+    this.maxSteerAngle = -0.34; // Maximum steering angle in radians
     this.maxTiltAngle = 0.1; // Maximum banking angle in radians
     
     // Collision detection
