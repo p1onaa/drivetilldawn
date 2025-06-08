@@ -36,6 +36,13 @@ export class GameScene {
     // Collision detection
     this.playerBoundingBox = new THREE.Box3();
     this.gameOver = false;
+    
+    // Progressive speed system
+    this.baseSpeed = 1.0; // Base speed multiplier
+    this.currentSpeedMultiplier = 1.0; // Current speed multiplier
+    this.maxSpeedMultiplier = 3.0; // Maximum speed multiplier (3x faster)
+    this.speedIncreaseRate = 0.0008; // How fast the speed increases (very gradual)
+    this.gameTime = 0; // Track game time for speed progression
   }
   
   async init() {
@@ -140,13 +147,34 @@ export class GameScene {
   update(input) {
     if (this.gameOver) return;
     
+    // Update game time and progressive speed
+    this.gameTime += 1/60; // Assuming 60 FPS
+    this.updateProgressiveSpeed();
+    
     this.handleInput(input);
     this.updateCarMovement();
     this.updateCarRotation();
     this.updateCollision();
-    this.roadSystem.update();
+    
+    // Pass speed multiplier to systems
+    this.roadSystem.update(this.currentSpeedMultiplier);
     this.skySystem.update();
-    this.trafficSystem.update();
+    this.trafficSystem.update(this.currentSpeedMultiplier);
+  }
+  
+  updateProgressiveSpeed() {
+    // Gradually increase speed over time
+    const targetSpeed = Math.min(
+      this.baseSpeed + (this.gameTime * this.speedIncreaseRate),
+      this.maxSpeedMultiplier
+    );
+    
+    // Smooth interpolation to the target speed
+    this.currentSpeedMultiplier = THREE.MathUtils.lerp(
+      this.currentSpeedMultiplier,
+      targetSpeed,
+      0.02 // Very smooth transition
+    );
   }
   
   handleInput(input) {
@@ -266,6 +294,11 @@ export class GameScene {
     return this.carTiltZ;
   }
   
+  // Getter for current speed multiplier
+  getSpeedMultiplier() {
+    return this.currentSpeedMultiplier;
+  }
+  
   isGameOver() {
     return this.gameOver;
   }
@@ -274,6 +307,10 @@ export class GameScene {
     this.gameOver = false;
     this.currentLane = 2;
     this.targetLaneX = this.lanes[this.currentLane];
+    
+    // Reset progressive speed system
+    this.gameTime = 0;
+    this.currentSpeedMultiplier = 1.0;
     
     // Reset lane changing state
     this.isChangingLanes = false;

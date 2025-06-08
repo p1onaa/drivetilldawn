@@ -11,11 +11,11 @@ export class TrafficSystem {
     this.spawnDistance = -100; // Spawn cars far ahead of player
     this.despawnDistance = 50; // Remove cars when they pass behind player
     this.spawnTimer = 0;
-    this.spawnInterval = 45; // Slightly faster spawning for more challenge
+    this.baseSpawnInterval = 45; // Base spawn interval
     this.isLoaded = false;
     
-    // All cars now move toward the player (oncoming traffic)
-    this.oncomingSpeed = 0.6; // Speed of all oncoming cars
+    // Base speeds for different traffic types
+    this.baseOncomingSpeed = 0.6; // Speed of all oncoming cars
   }
   
   async init() {
@@ -58,8 +58,6 @@ export class TrafficSystem {
             }
           });
           
-
-          
           return car;
         })
         .catch(error => {
@@ -74,7 +72,6 @@ export class TrafficSystem {
     console.log('Traffic car models loaded:', this.carModels.length);
   }
   
-  
   createFallbackCar(index) {
     const colors = [0xff4444, 0x44ff44, 0x4444ff, 0xffff44, 0xff44ff, 0x44ffff];
     const geometry = new THREE.BoxGeometry(2, 1, 4);
@@ -87,25 +84,30 @@ export class TrafficSystem {
     car.castShadow = true;
     car.receiveShadow = true;
     
-    
     return car;
   }
   
-  update() {
+  update(speedMultiplier = 1.0) {
     if (!this.isLoaded) return;
     
+    // Adjust spawn rate based on speed - faster game = more frequent spawning
+    const currentSpawnInterval = Math.max(
+      this.baseSpawnInterval / speedMultiplier,
+      20 // Minimum spawn interval to prevent overwhelming
+    );
+    
     this.spawnTimer++;
-    if (this.spawnTimer >= this.spawnInterval) {
-      this.spawnCar();
+    if (this.spawnTimer >= currentSpawnInterval) {
+      this.spawnCar(speedMultiplier);
       this.spawnTimer = 0;
     }
     
-    this.updateCars();
+    this.updateCars(speedMultiplier);
     this.cleanupCars();
   }
   
-  spawnCar() {
-    if (Math.random() < 0.8) { // 80% chance to spawn a car (increased for more challenge)
+  spawnCar(speedMultiplier = 1.0) {
+    if (Math.random() < 0.8) { // 80% chance to spawn a car
       const laneIndex = Math.floor(Math.random() * 4);
       const modelIndex = Math.floor(Math.random() * this.carModels.length);
       const carModel = this.carModels[modelIndex].clone();
@@ -115,7 +117,9 @@ export class TrafficSystem {
       carModel.position.y = 0;
       
       // All cars are now oncoming traffic - spawn far ahead and move toward player
-      const speed = this.oncomingSpeed + (Math.random() * 0.3 - 0.15); // Slight speed variation
+      // Apply speed multiplier to make traffic faster as game progresses
+      const baseSpeed = this.baseOncomingSpeed + (Math.random() * 0.3 - 0.15); // Slight speed variation
+      const speed = baseSpeed * speedMultiplier;
       const startZ = this.spawnDistance; // Far ahead of player
       const rotation = Math.PI; // Cars face toward player (correct orientation)
       
@@ -135,7 +139,7 @@ export class TrafficSystem {
     }
   }
   
-  updateCars() {
+  updateCars(speedMultiplier = 1.0) {
     this.cars.forEach(car => {
       // All cars move toward the player (positive Z direction - from far ahead to behind)
       car.mesh.position.z += car.speed;

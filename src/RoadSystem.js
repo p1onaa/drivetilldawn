@@ -6,7 +6,7 @@ export class RoadSystem {
     this.roadSegments = [];
     this.segmentLength = 50;
     this.numSegments = 6;
-    this.speed = 0.3;
+    this.baseSpeed = 0.3; // Base road speed
   }
   
   init() {
@@ -69,9 +69,12 @@ export class RoadSystem {
     }
   }
   
-  update() {
+  update(speedMultiplier = 1.0) {
+    // Apply speed multiplier to road movement
+    const currentSpeed = this.baseSpeed * speedMultiplier;
+    
     this.roadSegments.forEach(segment => {
-      segment.position.z += this.speed;
+      segment.position.z += currentSpeed;
       
       // Reset segment position when it goes behind the camera
       if (segment.position.z > this.segmentLength) {

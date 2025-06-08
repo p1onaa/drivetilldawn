@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Night Driving Scene</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000;
+        font-family: Arial, sans-serif;
+      }
+      
+      #gameContainer {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+      }
+      
+      #score {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        color: white;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px 25px;
+        border-radius: 8px;
+        font-size: 24px;
+        font-weight: bold;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      }
+      
+      #speedIndicator {
+        position: absolute;
+        top: 30px;
+        right: 30px;
+        color: white;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px 25px;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      }
+      
+      #loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 18px;
+        z-index: 200;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="gameContainer">
+      <div id="loading">Loading...</div>
+      <div id="score" style="display: none;">
+        Score: 0 meters
+      </div>
+      <div id="speedIndicator" style="display: none;">
+        Speed: 1.0x
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -78,7 +78,7 @@ class NightDrivingGame {
   
   updateScore() {
     if (this.scoreElement) {
-      this.scoreElement.textContent = Math.floor(this.score);
+      this.scoreElement.textContent = `Score: ${Math.floor(this.score)} meters`;
     }
   }
   
@@ -95,9 +95,11 @@ class NightDrivingGame {
     const input = this.inputHandler.getInput();
     this.gameScene.update(input);
     
-    // Update score - increase by distance traveled (simulate forward movement)
+    // Update score - increase by distance traveled with speed multiplier
     if (!this.gameScene.isGameOver()) {
-      this.score += 0.1; // Increment score by 0.1 meters per frame
+      const speedMultiplier = this.gameScene.getSpeedMultiplier();
+      // Base score increase of 0.1 meters per frame, multiplied by current speed
+      this.score += 0.1 * speedMultiplier;
       this.updateScore();
     }
     
