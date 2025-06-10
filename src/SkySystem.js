@@ -23,20 +23,20 @@ export class SkySystem {
   }
 
   createStars() {
-    const starCount = 80; // 10x more than original
-    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 800; // 10x more stars
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);
-    const sizes = new Float32Array(starCount);
 
     let starLightCount = 0;
-    const maxStarLights = 10; // Limit point lights for performance
+    const maxStarLights = 10;
 
     for (let i = 0; i < starCount; i++) {
       const i3 = i * 3;
+
+      // Distribute stars evenly on a sphere
       const radius = 150 + Math.random() * 250;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1); // Uniform sphere distribution
+      const theta = Math.random() * 2 * Math.PI;
+      const phi = Math.acos(2 * Math.random() - 1);
 
       const x = radius * Math.sin(phi) * Math.cos(theta);
       const y = radius * Math.cos(phi);
@@ -46,6 +46,7 @@ export class SkySystem {
       positions[i3 + 1] = y;
       positions[i3 + 2] = z;
 
+      // Random star colors
       const colorVariation = Math.random();
       if (colorVariation < 0.7) {
         colors[i3] = 1;
@@ -61,25 +62,24 @@ export class SkySystem {
         colors[i3 + 2] = 0.8;
       }
 
-      sizes[i] = Math.random() * 3 + 1;
-
-      if (Math.random() < 0.05 && y > 0 && starLightCount < maxStarLights) {
-        const starLight = new THREE.PointLight(
+      // Add small light to a few stars
+      if (Math.random() < 0.01 && y > 0 && starLightCount < maxStarLights) {
+        const light = new THREE.PointLight(
           new THREE.Color(colors[i3], colors[i3 + 1], colors[i3 + 2]),
           0.1,
           100,
           2
         );
-        starLight.position.set(x, y, z);
-        this.starLights.push(starLight);
-        this.scene.add(starLight);
+        light.position.set(x, y, z);
+        this.scene.add(light);
+        this.starLights.push(light);
         starLightCount++;
       }
     }
 
+    const starGeometry = new THREE.BufferGeometry();
     starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
     const starMaterial = new THREE.PointsMaterial({
       size: 2,
