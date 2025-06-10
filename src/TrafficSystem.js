@@ -16,16 +16,6 @@ export class TrafficSystem {
     
     // Base speeds for different traffic types
     this.baseOncomingSpeed = 0.6; // Speed of all oncoming cars
-    
-    // Color palette for bloom effects
-    this.carColors = [
-      new THREE.Color(0xff4444), // Red
-      new THREE.Color(0x44ff44), // Green
-      new THREE.Color(0x4444ff), // Blue
-      new THREE.Color(0xffff44), // Yellow
-      new THREE.Color(0xff44ff), // Magenta
-      new THREE.Color(0x44ffff)  // Cyan
-    ];
   }
   
   async init() {
@@ -42,33 +32,27 @@ export class TrafficSystem {
           const car = gltf.scene.clone();
           car.scale.setScalar(0.024);
           
-          // Enhanced bloom effect with car's original colors
+          // Enhanced bloom effect for better visibility
           car.traverse((child) => {
             if (child.isMesh) {
               child.castShadow = true;
               child.receiveShadow = true;
               
-              // Add bloom effect using the car's original color
+              // Add bloom effect instead of glow
               if (child.material) {
                 if (Array.isArray(child.material)) {
                   child.material.forEach(mat => {
-                    // Store original color or use a default from our palette
-                    const originalColor = mat.color ? mat.color.clone() : this.carColors[i - 1];
-                    
                     // Enhance material properties for bloom
                     mat.metalness = 0.3;
                     mat.roughness = 0.7;
-                    // Create bloom effect using the car's original color
-                    mat.emissive = originalColor.clone().multiplyScalar(0.2);
-                    mat.emissiveIntensity = 0.15; // Moderate intensity for bloom
+                    mat.emissive = new THREE.Color(0x111122); // Subtle blue emissive
+                    mat.emissiveIntensity = 0.1; // Low intensity for bloom
                   });
                 } else {
-                  const originalColor = child.material.color ? child.material.color.clone() : this.carColors[i - 1];
-                  
                   child.material.metalness = 0.3;
                   child.material.roughness = 0.7;
-                  child.material.emissive = originalColor.clone().multiplyScalar(0.2);
-                  child.material.emissiveIntensity = 0.15;
+                  child.material.emissive = new THREE.Color(0x111122);
+                  child.material.emissiveIntensity = 0.1;
                 }
               }
             }
@@ -89,12 +73,12 @@ export class TrafficSystem {
   }
   
   createFallbackCar(index) {
+    const colors = [0xff4444, 0x44ff44, 0x4444ff, 0xffff44, 0xff44ff, 0x44ffff];
     const geometry = new THREE.BoxGeometry(2, 1, 4);
-    const carColor = this.carColors[index - 1] || new THREE.Color(0x888888);
     const material = new THREE.MeshLambertMaterial({ 
-      color: carColor,
-      emissive: carColor.clone().multiplyScalar(0.2),
-      emissiveIntensity: 0.15
+      color: colors[index - 1] || 0x888888,
+      emissive: new THREE.Color(0x111122),
+      emissiveIntensity: 0.1
     });
     const car = new THREE.Mesh(geometry, material);
     car.castShadow = true;
