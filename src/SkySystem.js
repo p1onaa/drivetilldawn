@@ -82,7 +82,7 @@ export class SkySystem {
     starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const starMaterial = new THREE.PointsMaterial({
-      size: 2,
+      size: 0.02,
       sizeAttenuation: true,
       vertexColors: true,
       transparent: true,
