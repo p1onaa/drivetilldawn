@@ -62,16 +62,19 @@ export class SkySystem {
         colors[i3 + 2] = 0.8;
       }
 
-      // Add bright point light to every star
-      const light = new THREE.PointLight(
-        new THREE.Color(colors[i3], colors[i3 + 1], colors[i3 + 2]),
-        2.0,    // Maxed out intensity (adjust as needed)
-        200,    // Light distance/radius
-        2       // Decay rate
-      );
-      light.position.set(x, y, z);
-      this.scene.add(light);
-      this.starLights.push(light);
+      // Add small light to a few stars
+      if (Math.random() < 0.01 && y > 0 && starLightCount < maxStarLights) {
+        const light = new THREE.PointLight(
+          new THREE.Color(colors[i3], colors[i3 + 1], colors[i3 + 2]),
+          0.1,
+          100,
+          2
+        );
+        light.position.set(x, y, z);
+        this.scene.add(light);
+        this.starLights.push(light);
+        starLightCount++;
+      }
 
     }
 
