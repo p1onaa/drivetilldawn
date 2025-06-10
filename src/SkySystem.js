@@ -34,7 +34,7 @@ export class SkySystem {
       const i3 = i * 3;
 
       // Distribute stars evenly on a sphere
-      const radius = 150 + Math.random() * 250;
+      const radius = 10 + Math.random() * 250;
       const theta = Math.random() * 2 * Math.PI;
       const phi = Math.acos(2 * Math.random() - 1);
 
