@@ -74,7 +74,6 @@ export class SkySystem {
         this.scene.add(light);
         this.starLights.push(light);
         starLightCount++;
-    
 
     }
 
