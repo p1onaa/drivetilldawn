@@ -1,5 +1,5 @@
 {
-  "name": "night-driving-game",
+  "name": "drivetilldawn",
   "version": "1.0.0",
   "description": "A night driving game built with Three.js",
   "main": "src/main.js",
