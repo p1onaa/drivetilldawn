@@ -40,7 +40,7 @@ export class GameScene {
     // Progressive speed system
     this.baseSpeed = 1.8; // Base speed multiplier
     this.currentSpeedMultiplier = 1.2; // Current speed multiplier
-    this.maxSpeedMultiplier = 30.0; // Maximum speed multiplier (3x faster)
+    this.maxSpeedMultiplier = 30.0; // Maximum speed multiplier (30x faster)
     this.speedIncreaseRate = 0.01; // How fast the speed increases (very gradual)
     this.gameTime = 0; // Track game time for speed progression
   }
