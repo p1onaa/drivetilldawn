@@ -27,7 +27,7 @@ export class SkySystem {
   
   createStars() {
     const starGeometry = new THREE.BufferGeometry();
-    const starCount = 4000;
+    const starCount = 8;
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);
     const sizes = new Float32Array(starCount);
