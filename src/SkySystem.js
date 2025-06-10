@@ -23,7 +23,7 @@ export class SkySystem {
   }
 
   createStars() {
-    const starCount = 800; // 10x more stars
+    const starCount = 10000; // 10x more stars
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);
 
