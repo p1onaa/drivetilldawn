@@ -102,20 +102,26 @@ export class GameScene {
           child.castShadow = true;
           child.receiveShadow = true;
           
-          // Add bloom effect instead of glow for player car
+          // Add bloom effect for player car - enhanced green glow
           if (child.material) {
             if (Array.isArray(child.material)) {
               child.material.forEach(mat => {
+                // Store original color for bloom effect
+                const originalColor = mat.color ? mat.color.clone() : new THREE.Color(0x00ff00);
+                
                 mat.metalness = 0.4;
                 mat.roughness = 0.6;
-                mat.emissive = new THREE.Color(0x112211); // Green tint for player
-                mat.emissiveIntensity = 0.15; // Slightly higher for player visibility
+                // Create bloom effect using the car's original color with green tint
+                mat.emissive = originalColor.clone().multiplyScalar(0.3).lerp(new THREE.Color(0x00ff00), 0.4);
+                mat.emissiveIntensity = 0.25; // Higher intensity for player visibility
               });
             } else {
+              const originalColor = child.material.color ? child.material.color.clone() : new THREE.Color(0x00ff00);
+              
               child.material.metalness = 0.4;
               child.material.roughness = 0.6;
-              child.material.emissive = new THREE.Color(0x112211);
-              child.material.emissiveIntensity = 0.15;
+              child.material.emissive = originalColor.clone().multiplyScalar(0.3).lerp(new THREE.Color(0x00ff00), 0.4);
+              child.material.emissiveIntensity = 0.25;
             }
           }
         }
@@ -133,8 +139,8 @@ export class GameScene {
     const geometry = new THREE.BoxGeometry(2, 1, 4);
     const material = new THREE.MeshLambertMaterial({ 
       color: 0xff4444,
-      emissive: new THREE.Color(0x112211), // Green tint for player
-      emissiveIntensity: 0.15
+      emissive: new THREE.Color(0x00ff00), // Green bloom for player
+      emissiveIntensity: 0.25
     });
     this.car = new THREE.Mesh(geometry, material);
     this.car.position.set(this.targetLaneX, 0.5, 0);
@@ -330,12 +336,14 @@ export class GameScene {
         if (child.isMesh && child.material) {
           if (Array.isArray(child.material)) {
             child.material.forEach(mat => {
-              mat.emissive = new THREE.Color(0x112211);
-              mat.emissiveIntensity = 0.15;
+              const originalColor = mat.color ? mat.color.clone() : new THREE.Color(0x00ff00);
+              mat.emissive = originalColor.clone().multiplyScalar(0.3).lerp(new THREE.Color(0x00ff00), 0.4);
+              mat.emissiveIntensity = 0.25;
             });
           } else {
-            child.material.emissive = new THREE.Color(0x112211);
-            child.material.emissiveIntensity = 0.15;
+            const originalColor = child.material.color ? child.material.color.clone() : new THREE.Color(0x00ff00);
+            child.material.emissive = originalColor.clone().multiplyScalar(0.3).lerp(new THREE.Color(0x00ff00), 0.4);
+            child.material.emissiveIntensity = 0.25;
           }
         }
       });
