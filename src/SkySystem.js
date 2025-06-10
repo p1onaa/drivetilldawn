@@ -28,7 +28,7 @@ export class SkySystem {
     const colors = new Float32Array(starCount * 3);
 
     let starLightCount = 0;
-    const maxStarLights = 1000000;
+    const maxStarLights = 10000;
 
     for (let i = 0; i < starCount; i++) {
       const i3 = i * 3;
