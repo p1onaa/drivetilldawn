@@ -70,13 +70,6 @@ export class SkySystem {
       // Vary star sizes
       sizes[i] = Math.random() * 3 + 1;
       
-      // Add point lights for brighter stars (only for some stars to avoid performance issues)
-      if (Math.random() < 0.05 && y > 0) { // Only 5% of stars emit light, and only above horizon
-        const starLight = new THREE.PointLight(
-          new THREE.Color(colors[i3], colors[i3 + 1], colors[i3 + 2]),
-          0.1, // Low intensity
-          100, // Distance
-          2 // Decay
         );
         starLight.position.set(x, y, z);
         this.starLights.push(starLight);
